@@ -1,0 +1,1 @@
+This project will provide functionality for employees in a corporation to book vacations.
