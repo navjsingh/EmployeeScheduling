@@ -2,8 +2,13 @@ package com.navCorporation.vacationTracker.controller;
 
 import com.navCorporation.vacationTracker.dto.UserDto;
 import com.navCorporation.vacationTracker.dto.AdminUserUpdateRequest;
+import com.navCorporation.vacationTracker.dto.TeamDto;
+import com.navCorporation.vacationTracker.dto.CsvImportRequest;
 import com.navCorporation.vacationTracker.model.User;
+import com.navCorporation.vacationTracker.model.Team;
 import com.navCorporation.vacationTracker.repository.UserRepository;
+import com.navCorporation.vacationTracker.repository.TeamRepository;
+import com.navCorporation.vacationTracker.service.CsvImportService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,6 +17,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -24,6 +30,12 @@ public class AdminController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private TeamRepository teamRepository;
+
+    @Autowired
+    private CsvImportService csvImportService;
 
     @GetMapping("/users")
     public List<UserDto> getAllUsers() {
@@ -85,5 +97,70 @@ public class AdminController {
 
         userRepository.deleteById(id);
         return ResponseEntity.ok("User deleted successfully.");
+    }
+
+    // Team Management Endpoints
+    @GetMapping("/teams")
+    public List<TeamDto> getAllTeams() {
+        return teamRepository.findAll().stream()
+                .map(TeamDto::new)
+                .collect(Collectors.toList());
+    }
+
+    @PostMapping("/teams")
+    public ResponseEntity<?> createTeam(@Valid @RequestBody TeamDto teamDto) {
+        if (teamRepository.existsByName(teamDto.getName())) {
+            return new ResponseEntity<>("Team with this name already exists!", HttpStatus.BAD_REQUEST);
+        }
+
+        Team team = new Team(teamDto.getName(), teamDto.getDescription());
+        Team result = teamRepository.save(team);
+        return new ResponseEntity<>(new TeamDto(result), HttpStatus.CREATED);
+    }
+
+    @PutMapping("/teams/{id}")
+    public ResponseEntity<?> updateTeam(@PathVariable Long id, @Valid @RequestBody TeamDto teamDto) {
+        Team team = teamRepository.findById(id).orElse(null);
+        if (team == null) {
+            return new ResponseEntity<>("Team not found", HttpStatus.NOT_FOUND);
+        }
+
+        team.setName(teamDto.getName());
+        team.setDescription(teamDto.getDescription());
+
+        Team updatedTeam = teamRepository.save(team);
+        return ResponseEntity.ok(new TeamDto(updatedTeam));
+    }
+
+    @DeleteMapping("/teams/{id}")
+    public ResponseEntity<?> deleteTeam(@PathVariable Long id) {
+        try {
+            Team team = teamRepository.findById(id).orElse(null);
+            if (team == null) {
+                return new ResponseEntity<>(Map.of("message", "Team not found"), HttpStatus.NOT_FOUND);
+            }
+
+            // Check if team has members by querying users directly
+            long userCount = userRepository.countUsersByTeam(team);
+            if (userCount > 0) {
+                return new ResponseEntity<>(Map.of("message", "Cannot delete team with " + userCount + " members. Please reassign members first."), HttpStatus.FORBIDDEN);
+            }
+
+            teamRepository.deleteById(id);
+            return ResponseEntity.ok(Map.of("message", "Team deleted successfully."));
+        } catch (Exception e) {
+            return new ResponseEntity<>(Map.of("message", "Error deleting team: " + e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    // CSV Import Endpoint
+    @PostMapping("/import-csv")
+    public ResponseEntity<?> importUsersFromCsv(@Valid @RequestBody CsvImportRequest request) {
+        try {
+            Map<String, Object> result = csvImportService.importUsersFromCsv(request);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error importing users: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

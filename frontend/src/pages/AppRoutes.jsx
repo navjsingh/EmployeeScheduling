@@ -6,6 +6,7 @@ import LoginPage from './LoginPage';
 import RegisterPage from './RegisterPage';
 import DashboardPage from './DashboardPage';
 import AdminDashboard from './AdminDashboard';
+import AdminHomePage from './AdminHomePage';
 import ProfileModal from '../components/modals/ProfileModal';
 import AvailabilityModal from '../components/modals/AvailabilityModal';
 import SetEmployeeHoursModal from '../components/modals/SetEmployeeHoursModal';
@@ -40,7 +41,7 @@ function AppRoutes() {
   };
 
     return (
-        <>
+        <div className="min-h-screen flex flex-col">
             <Header 
               user={user} 
               onLogout={handleLogout} 
@@ -66,7 +67,7 @@ function AppRoutes() {
                           <ForgotPasswordModal onClose={() => 
                             setActiveModal(null)} />}
                     </>
-                ) : ( user.role === 'ADMIN' ? <AdminDashboard /> : <DashboardPage /> )}
+                ) : ( user.role === 'ADMIN' ? <AdminHomePage /> : <DashboardPage /> )}
             </main>
 
             <Footer />
@@ -79,7 +80,7 @@ function AppRoutes() {
 
             {activeModal === 'employeeHours' && 
               <SetEmployeeHoursModal onClose={() => setActiveModal(null)} />}
-        </>
+        </div>
     );
 }
 

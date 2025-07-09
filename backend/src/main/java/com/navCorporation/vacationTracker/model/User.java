@@ -37,6 +37,14 @@ public class User {
     )
     private Set<User> assignedEmployees = new HashSet<>();
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "team_id")
+    private Team team;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "team_manager_id")
+    private Team teamManager;
+
     // Constructors
     public User() {
     }
@@ -111,6 +119,22 @@ public class User {
 
     public void setAssignedEmployees(Set<User> assignedEmployees) {
         this.assignedEmployees = assignedEmployees;
+    }
+
+    public Team getTeam() {
+        return team;
+    }
+
+    public void setTeam(Team team) {
+        this.team = team;
+    }
+
+    public Team getTeamManager() {
+        return teamManager;
+    }
+
+    public void setTeamManager(Team teamManager) {
+        this.teamManager = teamManager;
     }
 
     @Override

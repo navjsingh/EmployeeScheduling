@@ -21,7 +21,8 @@ const apiRequest = async (endpoint, options = {}) => {
 
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: response.statusText }));
-        throw new Error(errorData.message || 'An unknown error occurred.');
+        console.error('API Error:', response.status, response.statusText, errorData);
+        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
     }
 
     // If the response has no content, return null
@@ -71,9 +72,55 @@ export const updateUserById = (id, userData) => {
     });
 };
 
+export const updateUser = (id, userData) => {
+    return apiRequest(`/admin/users/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(userData),
+    });
+};
+
 export const deleteUserById = (id) => {
     return apiRequest(`/admin/users/${id}`, {
         method: 'DELETE',
+    });
+};
+
+export const deleteUser = (id) => {
+    return apiRequest(`/admin/users/${id}`, {
+        method: 'DELETE',
+    });
+};
+
+// Team Management
+export const getAllTeams = () => {
+    return apiRequest('/admin/teams');
+};
+
+export const createTeam = (teamData) => {
+    return apiRequest('/admin/teams', {
+        method: 'POST',
+        body: JSON.stringify(teamData),
+    });
+};
+
+export const updateTeam = (id, teamData) => {
+    return apiRequest(`/admin/teams/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(teamData),
+    });
+};
+
+export const deleteTeam = (id) => {
+    return apiRequest(`/admin/teams/${id}`, {
+        method: 'DELETE',
+    });
+};
+
+// CSV Import
+export const importUsersFromCsv = (csvData) => {
+    return apiRequest('/admin/import-csv', {
+        method: 'POST',
+        body: JSON.stringify(csvData),
     });
 };
 

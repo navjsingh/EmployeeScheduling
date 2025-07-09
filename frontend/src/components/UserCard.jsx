@@ -16,6 +16,16 @@ function UserCard({ user, onEdit, onRemove }) {
         <p className="mt-2 inline-block bg-blue-100 text-blue-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">
             {user.role}
         </p>
+        {user.teamName && (
+            <p className="mt-1 inline-block bg-green-100 text-green-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">
+                {user.teamName}
+            </p>
+        )}
+        {user.teamManagerName && (
+            <p className="mt-1 inline-block bg-purple-100 text-purple-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">
+                Managed by: {user.teamManagerName}
+            </p>
+        )}
       </div>
       <div className="flex justify-end space-x-2 mt-4 pt-4 border-t">
         <button 

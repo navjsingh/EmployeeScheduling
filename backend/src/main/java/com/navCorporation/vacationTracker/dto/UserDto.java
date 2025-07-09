@@ -14,6 +14,8 @@ public class UserDto {
     private int totalVacationHours;
     private int usedVacationHours;
     private Set<Long> assignedEmployeeIds;
+    private String teamName;
+    private String teamManagerName;
 
     public UserDto() {}
 
@@ -29,6 +31,14 @@ public class UserDto {
             this.assignedEmployeeIds = user.getAssignedEmployees().stream()
                 .map(User::getId)
                 .collect(Collectors.toSet());
+        }
+        
+        // Set team information
+        if (user.getTeam() != null) {
+            this.teamName = user.getTeam().getName();
+        }
+        if (user.getTeamManager() != null) {
+            this.teamManagerName = user.getTeamManager().getName();
         }
     }
     
@@ -47,4 +57,8 @@ public class UserDto {
     public void setUsedVacationHours(int usedVacationHours) { this.usedVacationHours = usedVacationHours; }
     public Set<Long> getAssignedEmployeeIds() { return assignedEmployeeIds; }
     public void setAssignedEmployeeIds(Set<Long> assignedEmployeeIds) { this.assignedEmployeeIds = assignedEmployeeIds; }
+    public String getTeamName() { return teamName; }
+    public void setTeamName(String teamName) { this.teamName = teamName; }
+    public String getTeamManagerName() { return teamManagerName; }
+    public void setTeamManagerName(String teamManagerName) { this.teamManagerName = teamManagerName; }
 }
