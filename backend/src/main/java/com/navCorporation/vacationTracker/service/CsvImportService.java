@@ -143,19 +143,19 @@ public class CsvImportService {
                     }
                 }
 
-                // Set team manager (fix the manager assignment)
+                // Set manager
                 if (userData.getManagerEmail() != null && !userData.getManagerEmail().trim().isEmpty()) {
                     String managerEmail = userData.getManagerEmail().trim();
                     User manager = managersByEmail.get(managerEmail);
-                    if (manager != null && manager.getTeam() != null) {
-                        user.setTeamManager(manager.getTeam());
+                    if (manager != null) {
+                        user.setManager(manager);
                     } else {
                         // Try to find manager in existing users
                         Optional<User> managerUser = userRepository.findByEmail(managerEmail);
-                        if (managerUser.isPresent() && managerUser.get().getTeam() != null) {
-                            user.setTeamManager(managerUser.get().getTeam());
+                        if (managerUser.isPresent()) {
+                            user.setManager(managerUser.get());
                         } else {
-                            errors.add("Manager with email " + managerEmail + " not found or has no team for user " + email);
+                            errors.add("Manager with email " + managerEmail + " not found for user " + email);
                         }
                     }
                 }

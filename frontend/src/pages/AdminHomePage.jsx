@@ -4,8 +4,10 @@ import UserCard from '../components/UserCard';
 import TeamModal from '../components/modals/TeamModal';
 import CsvImportModal from '../components/modals/CsvImportModal';
 import UserDetailModal from '../components/modals/UserDetailModal';
+import BulkDeleteModal from '../components/modals/BulkDeleteModal';
 import VacationCalendar from '../components/VacationCalendar';
 import TeamSchedule from '../components/TeamSchedule';
+import TestAuth from '../components/TestAuth';
 import PlusIcon from '../components/icons/PlusIcon';
 import * as api from '../services/apiService';
 
@@ -27,6 +29,8 @@ function AdminHomePage() {
     const [selectedManagerForCalendar, setSelectedManagerForCalendar] = useState(null);
     const [selectedTeamForSchedule, setSelectedTeamForSchedule] = useState(null);
     const [selectedUser, setSelectedUser] = useState(null);
+    const [selectedUsers, setSelectedUsers] = useState([]);
+    const [showBulkDelete, setShowBulkDelete] = useState(false);
 
     const fetchData = async () => {
         setLoading(true);
@@ -102,6 +106,28 @@ function AdminHomePage() {
         setSelectedUser(null);
     };
 
+    const handleBulkDeleteSuccess = () => {
+        fetchData();
+        setSelectedUsers([]);
+        setShowBulkDelete(false);
+    };
+
+    const handleSelectAll = () => {
+        if (selectedUsers.length === filteredUsers.length) {
+            setSelectedUsers([]);
+        } else {
+            setSelectedUsers([...filteredUsers]);
+        }
+    };
+
+    const handleSelectUser = (user) => {
+        if (selectedUsers.find(u => u.id === user.id)) {
+            setSelectedUsers(selectedUsers.filter(u => u.id !== user.id));
+        } else {
+            setSelectedUsers([...selectedUsers, user]);
+        }
+    };
+
     const filteredUsers = users.filter(user => {
         const matchesTeam = !filters.team || user.teamName === filters.team;
         const matchesRole = !filters.role || user.role === filters.role;
@@ -165,6 +191,16 @@ function AdminHomePage() {
                                 }`}
                             >
                                 Team Schedule
+                            </button>
+                        </li>
+                        <li>
+                            <button
+                                onClick={() => setActiveView('test')}
+                                className={`w-full text-left px-3 py-2 rounded-lg ${
+                                    activeView === 'test' ? 'bg-blue-100 text-blue-700' : 'text-gray-700 hover:bg-gray-100'
+                                }`}
+                            >
+                                Test Auth
                             </button>
                         </li>
                     </ul>
@@ -265,11 +301,20 @@ function AdminHomePage() {
                         <div>
                             <div className="flex justify-between items-center mb-6">
                                 <h1 className="text-3xl font-bold text-gray-800">All Users</h1>
-                                <button 
-                                    onClick={() => setShowCsvImport(true)}
-                                    className="flex items-center cursor-pointer px-4 py-2 font-bold text-white bg-green-600 rounded-lg hover:bg-green-700">
-                                    Import CSV
-                                </button>
+                                <div className="flex space-x-2">
+                                    {selectedUsers.length > 0 && (
+                                        <button 
+                                            onClick={() => setShowBulkDelete(true)}
+                                            className="flex items-center cursor-pointer px-4 py-2 font-bold text-white bg-red-600 rounded-lg hover:bg-red-700">
+                                            Delete Selected ({selectedUsers.length})
+                                        </button>
+                                    )}
+                                    <button 
+                                        onClick={() => setShowCsvImport(true)}
+                                        className="flex items-center cursor-pointer px-4 py-2 font-bold text-white bg-green-600 rounded-lg hover:bg-green-700">
+                                        Import CSV
+                                    </button>
+                                </div>
                             </div>
 
                             {/* Filters */}
@@ -325,6 +370,14 @@ function AdminHomePage() {
                                 <table className="min-w-full bg-white rounded-lg shadow">
                                     <thead>
                                         <tr className="bg-gray-100 text-gray-700 text-sm">
+                                            <th className="px-4 py-2 text-left">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedUsers.length === filteredUsers.length && filteredUsers.length > 0}
+                                                    onChange={handleSelectAll}
+                                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                />
+                                            </th>
                                             <th className="px-4 py-2 text-left">Name</th>
                                             <th className="px-4 py-2 text-left">Email</th>
                                             <th className="px-4 py-2 text-left">Role</th>
@@ -337,16 +390,30 @@ function AdminHomePage() {
                                     <tbody>
                                         {filteredUsers.length === 0 && (
                                             <tr>
-                                                <td colSpan="7" className="text-center py-6 text-gray-400">No users found.</td>
+                                                <td colSpan="8" className="text-center py-6 text-gray-400">No users found.</td>
                                             </tr>
                                         )}
                                         {filteredUsers.map(user => (
                                             <tr 
                                                 key={user.id} 
-                                                className="border-b hover:bg-gray-50 cursor-pointer"
-                                                onClick={() => setSelectedUser(user)}
+                                                className={`border-b hover:bg-gray-50 ${
+                                                    selectedUsers.find(u => u.id === user.id) ? 'bg-blue-50' : ''
+                                                }`}
                                             >
-                                                <td className="px-4 py-2 font-medium text-gray-800">{user.name}</td>
+                                                <td className="px-4 py-2" onClick={(e) => e.stopPropagation()}>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={selectedUsers.find(u => u.id === user.id) !== undefined}
+                                                        onChange={() => handleSelectUser(user)}
+                                                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                    />
+                                                </td>
+                                                <td 
+                                                    className="px-4 py-2 font-medium text-gray-800 cursor-pointer"
+                                                    onClick={() => setSelectedUser(user)}
+                                                >
+                                                    {user.name}
+                                                </td>
                                                 <td className="px-4 py-2 text-gray-700">{user.email}</td>
                                                 <td className="px-4 py-2 text-gray-700">{user.role}</td>
                                                 <td className="px-4 py-2 text-gray-700">{user.teamName || '-'}</td>
@@ -383,6 +450,14 @@ function AdminHomePage() {
                             <TeamSchedule selectedTeam={null} />
                         </div>
                     )}
+
+                    {/* Test Auth */}
+                    {activeView === 'test' && (
+                        <div>
+                            <h1 className="text-3xl font-bold text-gray-800 mb-6">Authentication Test</h1>
+                            <TestAuth />
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -408,6 +483,14 @@ function AdminHomePage() {
                     onClose={() => setSelectedUser(null)}
                     onUpdate={handleUserUpdate}
                     onDelete={handleUserDelete}
+                />
+            }
+
+            {showBulkDelete && 
+                <BulkDeleteModal 
+                    selectedUsers={selectedUsers}
+                    onClose={() => setShowBulkDelete(false)}
+                    onSuccess={handleBulkDeleteSuccess}
                 />
             }
         </div>

@@ -5,20 +5,24 @@ function UserDetailModal({ user, onClose, onUpdate, onDelete }) {
     const [formData, setFormData] = useState({
         role: '',
         teamId: '',
+        managerId: '',
         totalVacationHours: 0,
         usedVacationHours: 0
     });
     const [teams, setTeams] = useState([]);
+    const [managers, setManagers] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     useEffect(() => {
         fetchTeams();
+        fetchManagers();
         if (user) {
             setFormData({
                 role: user.role || '',
                 teamId: user.teamId || '',
+                managerId: user.managerId || '',
                 totalVacationHours: user.totalVacationHours || 0,
                 usedVacationHours: user.usedVacationHours || 0
             });
@@ -34,6 +38,16 @@ function UserDetailModal({ user, onClose, onUpdate, onDelete }) {
         }
     };
 
+    const fetchManagers = async () => {
+        try {
+            const usersData = await api.getAllUsers();
+            const managerUsers = usersData.filter(user => user.role === 'MANAGER');
+            setManagers(managerUsers);
+        } catch (err) {
+            console.error('Failed to fetch managers:', err);
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -42,7 +56,8 @@ function UserDetailModal({ user, onClose, onUpdate, onDelete }) {
         try {
             const updateData = {
                 ...formData,
-                teamId: formData.teamId || null
+                teamId: formData.teamId || null,
+                managerId: formData.managerId || null
             };
             
             await api.updateUser(user.id, updateData);
@@ -147,6 +162,23 @@ function UserDetailModal({ user, onClose, onUpdate, onDelete }) {
                                 <option value="">No Team</option>
                                 {teams.map(team => (
                                     <option key={team.id} value={team.id}>{team.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Manager</label>
+                            <select
+                                name="managerId"
+                                value={formData.managerId}
+                                onChange={handleChange}
+                                disabled={loading}
+                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
+                            >
+                                <option value="">No Manager</option>
+                                {managers.map(manager => (
+                                    <option key={manager.id} value={manager.id}>
+                                        {manager.name} ({manager.email})
+                                    </option>
                                 ))}
                             </select>
                         </div>

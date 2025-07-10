@@ -42,8 +42,8 @@ public class User {
     private Team team;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "team_manager_id")
-    private Team teamManager;
+    @JoinColumn(name = "manager_id")
+    private User manager;
 
     // Constructors
     public User() {
@@ -129,12 +129,12 @@ public class User {
         this.team = team;
     }
 
-    public Team getTeamManager() {
-        return teamManager;
+    public User getManager() {
+        return manager;
     }
 
-    public void setTeamManager(Team teamManager) {
-        this.teamManager = teamManager;
+    public void setManager(User manager) {
+        this.manager = manager;
     }
 
     @Override

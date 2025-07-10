@@ -16,6 +16,8 @@ public class UserDto {
     private Set<Long> assignedEmployeeIds;
     private String teamName;
     private String teamManagerName;
+    private Long teamId;
+    private Long managerId;
 
     public UserDto() {}
 
@@ -36,9 +38,11 @@ public class UserDto {
         // Set team information
         if (user.getTeam() != null) {
             this.teamName = user.getTeam().getName();
+            this.teamId = user.getTeam().getId();
         }
-        if (user.getTeamManager() != null) {
-            this.teamManagerName = user.getTeamManager().getName();
+        if (user.getManager() != null) {
+            this.teamManagerName = user.getManager().getName();
+            this.managerId = user.getManager().getId();
         }
     }
     
@@ -61,4 +65,8 @@ public class UserDto {
     public void setTeamName(String teamName) { this.teamName = teamName; }
     public String getTeamManagerName() { return teamManagerName; }
     public void setTeamManagerName(String teamManagerName) { this.teamManagerName = teamManagerName; }
+    public Long getTeamId() { return teamId; }
+    public void setTeamId(Long teamId) { this.teamId = teamId; }
+    public Long getManagerId() { return managerId; }
+    public void setManagerId(Long managerId) { this.managerId = managerId; }
 }

@@ -34,24 +34,34 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             String jwt = getJwtFromRequest(request);
 
-            if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
-                String username = tokenProvider.getUsernameFromJWT(jwt);
+            // --- DEBUG LOGGING ---
+            log.info("Request for URI: {} with method: {}", request.getRequestURI(), request.getMethod());
+            log.info("JWT token present: {}", StringUtils.hasText(jwt));
 
-                // --- DEBUG LOGGING ---
-                log.info("Request for URI: {}", request.getRequestURI());
-                log.info("Token is valid. Loading user details for: {}", username);
+            if (StringUtils.hasText(jwt)) {
+                boolean isValid = tokenProvider.validateToken(jwt);
+                log.info("Token validation result: {}", isValid);
+                
+                if (isValid) {
+                    String username = tokenProvider.getUsernameFromJWT(jwt);
+                    log.info("Token is valid. Loading user details for: {}", username);
 
-                UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
+                    UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
 
-                // --- CRITICAL DEBUG LOGGING ---
-                log.info("User authorities loaded from UserDetailsService: {}", userDetails.getAuthorities());
+                    // --- CRITICAL DEBUG LOGGING ---
+                    log.info("User authorities loaded from UserDetailsService: {}", userDetails.getAuthorities());
 
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                log.info("Successfully set authentication in Security Context for user: {}", username);
+                    log.info("Successfully set authentication in Security Context for user: {}", username);
+                } else {
+                    log.warn("Invalid JWT token for request: {}", request.getRequestURI());
+                }
+            } else {
+                log.warn("No JWT token found for request: {}", request.getRequestURI());
             }
         } catch (Exception ex) {
             log.error("Could not set user authentication in security context", ex);

@@ -26,7 +26,7 @@ A full-stack web application designed to streamline the process of requesting, a
 
 ### 🛠️ Administrators
 - **Team Overview** – Default homepage showing all teams with clickable team cards
-- **User Management** – View all users with advanced filtering (team, role, search) and clickable user details
+- **User Management** – View all users with advanced filtering (team, role, search), clickable user details, and bulk delete functionality
 - **Team Details** – Click on teams to see managers and employees.
 - **Team Management** – Create, edit, and delete teams with proper validation and error handling
 - **CSV Import** – Bulk import/update users with file upload and create/update modes
@@ -151,6 +151,7 @@ Alice Johnson,alice.johnson@company.com,Blue,jane.smith@company.com,EMPLOYEE,160
 ### Latest Features (v2.0)
 - **Enhanced Team Management**: Improved team creation, editing, and deletion with proper validation
 - **User Details Modal**: Clickable user rows with comprehensive editing capabilities
+- **Bulk User Management**: Modern multi-select interface with bulk delete functionality
 - **Improved Vacation Calendar**: Team and manager selection dropdowns with conditional display
 - **Optimized Team Schedule**: Shows all teams by default with proper filtering and 24-hour day columns
 - **Better Error Handling**: User-friendly error messages and loading states throughout the application

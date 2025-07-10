@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Input from '../Input';
+import * as api from '../../services/apiService';
 
 function EditUserModal({ user, onClose, onSave }) {
     const [name, setName] = useState(user.name || '');
@@ -7,15 +8,44 @@ function EditUserModal({ user, onClose, onSave }) {
     const [password, setPassword] = useState('');
     const [role, setRole] = useState(user.role || 'EMPLOYEE');
     const [totalVacationHours, setTotalVacationHours] = useState(user.totalVacationHours || 80);
+    const [teamId, setTeamId] = useState(user.teamId || '');
+    const [managerId, setManagerId] = useState(user.managerId || '');
+    const [teams, setTeams] = useState([]);
+    const [managers, setManagers] = useState([]);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+
+    // Load teams and managers on component mount
+    useEffect(() => {
+        const loadData = async () => {
+            try {
+                const [teamsData, usersData] = await Promise.all([
+                    api.getAllTeams(),
+                    api.getAllUsers()
+                ]);
+                setTeams(teamsData);
+                // Filter managers (users with MANAGER role)
+                const managerUsers = usersData.filter(user => user.role === 'MANAGER');
+                setManagers(managerUsers);
+            } catch (err) {
+                console.error('Error loading data:', err);
+            }
+        };
+        loadData();
+    }, []);
 
     const handleSubmit = async(e) => {
         e.preventDefault(); 
         setError('');
         setLoading(true);
 
-        const payload = { name, role, totalVacationHours };
+        const payload = { 
+            name, 
+            role, 
+            totalVacationHours,
+            teamId: teamId || null,
+            managerId: managerId || null
+        };
         if (user.isNew) {
             payload.email = email;
             payload.password = password;
@@ -70,6 +100,37 @@ function EditUserModal({ user, onClose, onSave }) {
                         onChange={e => 
                             setTotalVacationHours(Number(e.target.value))} 
                         disabled={user.role === 'ADMIN'} />
+                    
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Team</label>
+                        <select 
+                            value={teamId} 
+                            onChange={e => setTeamId(e.target.value)} 
+                            className="w-full px-4 py-2 border rounded-lg bg-white">
+                            <option value="">No Team</option>
+                            {teams.map(team => (
+                                <option key={team.id} value={team.id}>
+                                    {team.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Manager</label>
+                        <select 
+                            value={managerId} 
+                            onChange={e => setManagerId(e.target.value)} 
+                            className="w-full px-4 py-2 border rounded-lg bg-white">
+                            <option value="">No Manager</option>
+                            {managers.map(manager => (
+                                <option key={manager.id} value={manager.id}>
+                                    {manager.name} ({manager.email})
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
                     <div className="flex justify-end space-x-4 pt-4">
                         <button 
                             type="button" 

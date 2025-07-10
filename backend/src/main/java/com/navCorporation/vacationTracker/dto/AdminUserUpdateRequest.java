@@ -8,6 +8,8 @@ public class AdminUserUpdateRequest {
     private String password;
     private Role role;
     private int totalVacationHours;
+    private Long teamId;
+    private Long managerId;
 
     public AdminUserUpdateRequest() {}
     
@@ -49,5 +51,21 @@ public class AdminUserUpdateRequest {
 
     public void setTotalVacationHours(int totalVacationHours) {
         this.totalVacationHours = totalVacationHours;
+    }
+
+    public Long getTeamId() {
+        return teamId;
+    }
+
+    public void setTeamId(Long teamId) {
+        this.teamId = teamId;
+    }
+
+    public Long getManagerId() {
+        return managerId;
+    }
+
+    public void setManagerId(Long managerId) {
+        this.managerId = managerId;
     }
 }
